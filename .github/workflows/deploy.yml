@@ -28,7 +28,7 @@ jobs:
 
       - name: Rsync site
         run: |
-          rsync -az --delete --exclude '.git' --exclude '.github' ./ root@167.172.70.228:/var/www/achagani.com/
+          rsync -az --delete --exclude '.git' --exclude '.github' -e "ssh -i ~/.ssh/id_deploy -o IdentitiesOnly=yes" ./ root@167.172.70.228:/var/www/achagani.com/
 
       - name: Healthcheck
         run: |
