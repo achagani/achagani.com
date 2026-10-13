@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>g-helper-linux — ASUS control without Armoury Crate</title>
+<meta name="description" content="An unofficial Linux port of G-Helper: fan curves, AURA RGB, MUX switching, and battery limits for ASUS ROG, TUF, Flow, and Ally laptops.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<nav><div class="wrap">
+  <span class="mark">Aslam Chagani</span>
+  <span class="links">
+    <a href="../index.html#story">About</a>
+    <a href="../index.html#work">Work</a>
+    <a href="../index.html#career">Career</a>
+    <a href="../index.html#contact">Contact</a>
+  </span>
+</div></nav>
+
+<div class="wrap dive">
+  <a class="back" href="../index.html#work">&larr; Selected work</a>
+  <h1>g-helper-linux</h1>
+  <p class="tagline">The control panel ASUS never shipped for Linux: fan curves, RGB, MUX switching, battery limits — no bloat, no telemetry.</p>
+  <div class="meta">
+    <span><b>Stack:</b> C# / .NET, C, shell, Nix</span>
+    <span><b>Status:</b> Public</span>
+    <span><b>Links:</b> <a href="https://github.com/achagani/g-helper-linux">github.com/achagani/g-helper-linux</a></span>
+  </div>
+  <figure class="shot"><img src="../assets/shots/ghelper.png" alt="Screenshot from the project's GitHub repo — the full control surface on Linux." loading="lazy"><figcaption>Screenshot from the project's GitHub repo — the full control surface on Linux.</figcaption></figure>
+
+
+  <h2><span class="no">01</span>The problem</h2>
+  <p>ASUS builds some of the most interesting laptops on the market — ROG and TUF gaming machines, the Flow and the Z13, the Ally handheld, Zenbooks with MiniLED panels — and then ships the software that actually controls them, Armoury Crate, for Windows only. On Linux the hardware boots into firmware defaults and stays there. You cannot set a fan curve, cap the charge level, switch the graphics MUX, or touch the per-key RGB without a terminal and a lottery of half-maintained scripts.</p>
+  <p>On Windows, the open-source <a href="https://github.com/seerge/g-helper">G-Helper</a> had already proven the point: a single lightweight tray app can replace the entire Armoury Crate install — hundreds of megabytes of vendor packaging reduced to one binary that does the same job. The Linux side had <code>asusctl</code>, which is fine until you are not on the one distro its maintainers target. The motivation in this repo is blunt about it: the coverage wasn't there, so the port happened.</p>
+
+  <h2><span class="no">02</span>The approach</h2>
+  <p>Rather than rewrite the idea from scratch, the project keeps G-Helper's C# codebase and ports its functionality to Linux, shipping as a self-contained binary and an AppImage. The insight that makes the port possible is that Armoury Crate is not magic: it talks to the laptop through kernel <code>sysfs</code> attributes and ACPI/WMI methods exposed by the <code>asus-nb-wmi</code> module. Those interfaces exist on Linux too. Remove the vendor packaging and the same controls are reachable.</p>
+  <p>What that buys, in one screen: Silent / Balanced / Turbo performance modes, eight-point drag-to-edit fan curves per fan, battery charge limits from 40&ndash;100%, four GPU modes (Eco, Standard, Optimized, Ultimate) driving the dGPU power state and MUX switch, CPU power limits (PL1/PL2), refresh-rate and Panel OD control, MiniLED modes, per-key AURA keyboard RGB, undervolting via AMD Curve Optimizer, Fn-key remapping, trackpad numpad emulation, a live system monitor in the tray, and a self-updater. There is even experimental Lenovo support riding the mainline <code>ideapad-laptop</code> kernel drivers.</p>
+
+  <h2><span class="no">03</span>Trade-offs</h2>
+  <div class="trade"><b>Reverse-engineered interfaces vs. vendor support.</b> Nothing here is blessed by ASUS. Features are gated on kernel version — fans and battery limits from 5.17, MUX switching from 6.1, power limits from 6.2, MiniLED from 6.9 — and 2020&ndash;2021 laptops that lack the sysfs attributes need a raw ACPI/WMI mode through debugfs. Every kernel update is a regression risk the community absorbs.</div>
+  <div class="trade"><b>Keeping C# vs. a native rewrite.</b> A native tool would be leaner, but the C# codebase was already proven on Windows; porting it and shipping self-contained runtimes trades a larger binary for speed of development and feature parity.</div>
+  <div class="trade"><b>Direct firmware writes are not risk-free.</b> The MUX switch is latched — switching to Ultimate requires a reboot, and Eco-to-Ultimate round trips can take two. An interrupted write during a MUX switch could leave the machine in a state that needs a CMOS reset. The app discloses this plainly, shows pending modes in the UI, and blocks the dGPU driver with modprobe rules rather than pretending the danger isn't there.</div>
+  <div class="trade"><b>Community-maintained forever.</b> There is no vendor on the hook. The mitigation is the ecosystem itself: open issues, welcome pull requests, and an installer that uninstalls cleanly.</div>
+
+  <h2><span class="no">04</span>Under the hood</h2>
+  <p>The runtime contract is small. The <code>asus_nb_wmi</code> and <code>asus_wmi</code> kernel modules must be loaded (they are, by default, on ASUS laptops); everything else flows through sysfs reads and writes. GPU mode changes that need to happen before the display manager starts are staged as pending state and applied by a systemd oneshot service at boot. Eco mode with an active dGPU driver offers a three-way choice — unload now with elevated privileges, block the driver via modprobe rules for next boot, or cancel. Undervolting stays hidden unless the separate <code>ryzen_smu</code> driver is loaded and the CPU is supported: the app refuses to expose a control it cannot verify. The result is what Armoury Crate should have been — one binary, every switch, and a kernel feature matrix that tells you exactly what your machine can do.</p>
+
+  <div class="pager">
+    <a href="sovereign.html">&larr; Sovereign</a>
+    <a href="power-observatory.html">Power Observatory &rarr;</a>
+  </div>
+</div>
+
+<footer><div class="wrap">
+  <span class="fine">&copy; 2026 Aslam Chagani &middot; Columbia College, BSc Computer Science</span>
+  <span class="links">
+    <a href="mailto:chagani.aslam@gmail.com">Email</a>
+    <a href="https://github.com/achagani">GitHub</a>
+    <a href="https://linkedin.com/in/achagani">LinkedIn</a>
+  </span>
+</div></footer>
+
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TaskCards — keyboard-first sticky-note boards over Obsidian TaskNotes</title>
+<meta name="description" content="Spatial, keyboard-first sticky-note task boards over Obsidian TaskNotes on Omarchy: topic layouts, quick capture, and three skins.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<nav><div class="wrap">
+  <span class="mark">Aslam Chagani</span>
+  <span class="links">
+    <a href="../index.html#story">About</a>
+    <a href="../index.html#work">Work</a>
+    <a href="../index.html#career">Career</a>
+    <a href="../index.html#contact">Contact</a>
+  </span>
+</div></nav>
+
+<div class="wrap dive">
+  <a class="back" href="../index.html#work">&larr; Selected work</a>
+  <h1>TaskCards</h1>
+  <p class="tagline">Sticky notes that remember where things are — keyboard-first boards over Obsidian TaskNotes, on Omarchy.</p>
+  <div class="meta">
+    <span><b>Stack:</b> Quickshell / QML, Obsidian TaskNotes</span>
+    <span><b>Status:</b> Public</span>
+    <span><b>Links:</b> <a href="https://github.com/achagani/omarchy-taskcards">github.com/achagani/omarchy-taskcards</a></span>
+  </div>
+  <figure class="shot"><img src="../assets/shots/taskcards.png" alt="Screenshot from the project — polished board view over Obsidian TaskNotes." loading="lazy"><figcaption>Screenshot from the project — polished board view over Obsidian TaskNotes.</figcaption></figure>
+
+  <figure class="shot"><img src="../assets/shots/taskcards-grid.png" alt="Grouped-grid layout — spatial topic groupings persisted separately from the task data." loading="lazy"><figcaption>Grouped-grid layout — spatial topic groupings persisted separately from the task data.</figcaption></figure>
+
+
+  <h2><span class="no">01</span>The problem</h2>
+  <p>Task lists flatten everything. In a to-do app, every task is one row in one long column, and position carries no meaning — the third item this morning is the third item tonight only by accident of sorting. That throws away the way people actually manage visible work. Pin notes to a wall and you stop remembering <em>what</em> you wrote and start remembering <em>where</em> it is: top-left is the launch, the cluster near the door is the errands. Spatial memory is a real cognitive tool, and almost every digital task system discards it in favor of the search box.</p>
+  <p>The second half of the problem is capture. A thought is worth about ten seconds. If writing it down means alt-tabbing, opening an app, finding the right list, and clicking a button, the thought evaporates first.</p>
+
+  <h2><span class="no">02</span>The approach</h2>
+  <p>TaskCards puts sticky notes back on the wall — the desktop wall. It runs as an overlay on Omarchy, the Arch-based distribution built around the Hyprland compositor and Quickshell, the framework for writing desktop widgets in QML. The boards sit above the workspace, always visible, never a window you have to raise. Tasks come from Obsidian TaskNotes, a plugin whose central bet is that <strong>a task is just a Markdown note</strong>: a file with YAML frontmatter carrying <code>title</code>, <code>status</code>, <code>priority</code>, <code>due</code>, and project links, and a freeform body underneath. TaskCards reads those plain-text files and renders them as cards you arrange into topic layouts — a board per subject, positioned once, recognized at a glance thereafter. Capture is a keystroke: a card appears, you type, it's in the vault. Three skins keep the wall your taste, not the framework's.</p>
+
+  <h2><span class="no">03</span>Trade-offs</h2>
+  <div class="trade"><b>Overlay widgets vs. app windows.</b> An overlay is always present with zero alt-tab cost, but it lives outside normal window management: no chrome, no taskbar entry, and a discipline about keyboard focus so the wall never steals input from the work underneath. Quickshell exists precisely to make that tractable on a Wayland compositor.</div>
+  <div class="trade"><b>TaskNotes as backend vs. a dedicated task app.</b> The board is a view, not the source of truth. Tasks stay plain Markdown in an Obsidian vault — readable by any tool, syncable through Obsidian or git, greppable, diffable, and portable to whatever replaces TaskNotes someday. The cost is that the schema isn't ours: board behavior rides on the plugin's frontmatter conventions, and every interaction round-trips through files rather than a database query.</div>
+  <div class="trade"><b>Keyboard-first has a learning curve.</b> Before the bindings are muscle memory, a keyboard-only capture flow is slower than a mouse click you already know. The bet is that capture is repeated thousands of times and the curve is paid once — and that a mouse-free loop is the only kind that survives a tiling window manager.</div>
+
+  <h2><span class="no">04</span>Under the hood</h2>
+  <p>The architecture keeps three concerns cleanly apart. The vault is data: TaskNotes Markdown files with YAML frontmatter, watched for changes so edits made in Obsidian appear on the wall without a restart. The board is layout: card positions and topic groupings persist separately from the task data, so arranging your wall never rewrites your notes, and a note edited in Obsidian never jumps off the wall. The overlay is presentation: a Quickshell QML layer drawn over Hyprland's workspaces, with keyboard bindings for capture, focus, and status changes, and three interchangeable skins swapping the card styling wholesale. It's a small, deliberate stack — plain text in, spatial memory out — built for the way one person actually thinks.</p>
+
+  <div class="pager">
+    <a href="power-observatory.html">&larr; Power Observatory</a>
+    <a href="datumara.html">Datumara &rarr;</a>
+  </div>
+</div>
+
+<footer><div class="wrap">
+  <span class="fine">&copy; 2026 Aslam Chagani &middot; Columbia College, BSc Computer Science</span>
+  <span class="links">
+    <a href="mailto:chagani.aslam@gmail.com">Email</a>
+    <a href="https://github.com/achagani">GitHub</a>
+    <a href="https://linkedin.com/in/achagani">LinkedIn</a>
+  </span>
+</div></footer>
+
+</body>
+</html>

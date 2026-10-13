@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Steward — a personal financial AI planner · Aslam Chagani</title>
+<meta name="description" content="Read-only brokerage ingestion, account-aware tax logic, and local-only inference: a personal finance dashboard where the data never leaves the machine.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<nav><div class="wrap">
+  <span class="mark">Aslam Chagani</span>
+  <span class="links">
+    <a href="../index.html#story">About</a>
+    <a href="../index.html#work">Work</a>
+    <a href="../index.html#career">Career</a>
+    <a href="../index.html#contact">Contact</a>
+  </span>
+</div></nav>
+
+<div class="wrap dive">
+  <a class="back" href="../index.html#work">← Selected work</a>
+  <h1>Steward</h1>
+  <p class="tagline">A personal financial AI planner: your full money picture reconstructed locally, plans simulated nightly, with a hard rule that the data never leaves the machine.</p>
+  <div class="meta">
+    <span><b>Stack:</b> Python · SQLite · browser automation · static HTML + cron</span>
+    <span><b>Status:</b> Private, running daily</span>
+    <span><b>Links:</b> none public</span>
+  </div>
+  <figure class="shot"><img src="../assets/shots/steward.png" alt="Screenshot of the live dashboard with real data — the daily self-hosted build." loading="lazy"><figcaption>Screenshot of the live dashboard with real data — the daily self-hosted build.</figcaption></figure>
+
+
+  <h2><span class="no">01</span>The problem</h2>
+  <p>Your financial life is most complete inside your brokerage's web portal — and least portable
+  anywhere else. The cloud aggregators that promise a unified view want, as the price of admission,
+  your credentials and a continuous feed of your financial history routed through their servers. I've
+  spent a career building the systems that other people's sensitive data flows through; I know exactly
+  what "we take security seriously" is worth when the business model is the data. What I actually
+  wanted was modest: the portal's picture — positions, activity, cash flow, tax context — queryable
+  on my own hardware, with no third party in the loop.</p>
+
+  <h2><span class="no">02</span>The approach</h2>
+  <p>Steward is a pipeline, not an app. A read-only browser automation pulls the brokerage's own
+  tables — the positions page is an ag-Grid widget whose pinned label column and centered data cells
+  arrive as separate fragments, so the parser pairs them row by row, stripping section headers and
+  totals — and lands everything in a local SQLite database: accounts, positions, transactions, daily
+  snapshots. From that store, a deterministic analysis pipeline computes subscription-like
+  recurring charges, cash-flow trends, concentration risk, and opportunity scans, and a static HTML
+  dashboard is regenerated daily by cron. No server, no daemon with a port, no login. The dashboard
+  is a file; the database is a file; the whole system is a directory I can back up.</p>
+
+  <h2><span class="no">03</span>Trade-offs</h2>
+  <div class="trade"><b>Scraping over aggregators</b> — browser automation of a portal is fragile in
+  a way an API never is: a redesign breaks the parser. I accepted that fragility because it sits on my
+  side of the trust boundary. A broken scrape shows up as a failed cron run I fix in an hour; a
+  breached aggregator is someone else's incident with my data in the headline. The parsers are
+  deliberately dumb and explicit — regex over pinned-row labels, known account-name mappings — so they
+  fail loudly rather than silently mis-parsing.</div>
+  <div class="trade"><b>Account-aware tax logic</b> — a rebalancing suggestion that ignores account
+  type is noise. The engine classifies every account — taxable, Roth IRA, traditional IRA,
+  ESPP-retirement — and treats them differently: trades inside tax-deferred accounts are not taxable
+  events, so opportunity scans run only against taxable holdings, and loss-harvesting logic never
+  fires where it can't help. The same dollar means three different things depending on which wrapper
+  holds it; the schema knows that even when generic tools don't.</div>
+  <div class="trade"><b>Local-only inference, enforced</b> — the analytical core is deterministic
+  rules; where a language model narrates or explores the data, it is pinned to a local inference
+  engine. This started as a prompt-level intention, and a misconfiguration once routed inference to a
+  cloud model anyway. It was caught, fixed, and promoted into the AgentOS policy layer as a typed rule:
+  financial target-class data may never reach a cloud-locality model — local only. The lesson is that
+  a privacy promise resting on a prompt is a wish; the same promise as a schema-checked policy with a
+  named enforcer is a boundary.</div>
+
+  <h2><span class="no">04</span>Under the hood</h2>
+  <p>The repo is a small monorepo of plain scripts: an <code>ingest/</code> layer (position parser,
+  activity parsers for two export formats, a local token-handling helper whose callback server binds
+  to 127.0.0.1 only), an <code>analysis/</code> layer (subscriptions, cashflow, opportunities,
+  insights — each writing structured JSON), and a <code>dashboard/</code> layer that exports a JSON
+  snapshot into an HTML template. A single pipeline runner executes the steps in order and stops on
+  the first failure, so a bad day is visible rather than half-rendered. Cron drives the daily refresh
+  and the dashboard rebuild; the AgentOS ontology tracks the job, its state files, and its failure
+  routing like any other member of the fleet. You will not find balances, account numbers, or dollar
+  figures on this page — by design, that part of the system stays where it belongs.</p>
+
+  <div class="pager"><a href="../index.html#work">← All work</a><a href="nestfinder.html">Next →</a></div>
+</div>
+
+</body>
+</html>

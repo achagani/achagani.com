@@ -1,0 +1,35 @@
+name: deploy
+# Publish achagani.com static site to droplet ovl1.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "**"
+      - "!.gitignore"
+      - "!README.md"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-site
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          ssh-keyscan -H 167.172.70.228 >> ~/.ssh/known_hosts
+
+      - name: Rsync site
+        run: |
+          rsync -az --delete --exclude '.git' --exclude '.github' ./ root@167.172.70.228:/var/www/achagani.com/
+
+      - name: Healthcheck
+        run: |
+          curl -sf https://achagani.com/ | grep -q "Aslam Chagani" && echo "SITE OK $(date -Is)"

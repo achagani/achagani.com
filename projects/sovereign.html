@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sovereign — a private, local AI stack · Aslam Chagani</title>
+<meta name="description" content="A local-first AI stack: llama.cpp and llama-swap on AMD Strix Halo — many models, one OpenAI-compatible endpoint, hot-swapped.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<nav><div class="wrap">
+  <span class="mark">Aslam Chagani</span>
+  <span class="links">
+    <a href="../index.html#story">About</a>
+    <a href="../index.html#work">Work</a>
+    <a href="../index.html#career">Career</a>
+    <a href="../index.html#contact">Contact</a>
+  </span>
+</div></nav>
+
+<div class="wrap dive">
+  <a class="back" href="../index.html#work">← Selected work</a>
+  <h1>Sovereign</h1>
+  <p class="tagline">A sovereign AI stack: your models, your machine, one endpoint — private by construction, hot-swapped on consumer silicon.</p>
+
+  <div class="meta">
+    <span><b>Stack:</b> llama.cpp · llama-swap · ROCm · GGUF · Python</span>
+    <span><b>Status:</b> Public repo, daily-driver</span>
+    <span><b>Links:</b> <a href="https://github.com/achagani/local-ai">github.com/achagani/local-ai</a></span>
+  </div>
+  <figure class="shot"><img src="../assets/shots/sovereign.png" alt="Product shot — status, one OpenAI-compatible endpoint, model hot-swap in under 4 seconds (recreated from the running stack)." loading="lazy"><figcaption>Product shot — status, one OpenAI-compatible endpoint, model hot-swap in under 4 seconds (recreated from the running stack).</figcaption></figure>
+
+
+  <h2><span class="no">01</span>The problem</h2>
+  <p>Local AI usually arrives as a pile of scripts. A web UI here, a launch script there, a
+  folder of model weights nobody has pruned since March. Every app that wants an
+  OpenAI-compatible endpoint gets its own port and its own mental model; switching models
+  means quitting, waiting, restarting. Nothing fails loudly when a config drifts or a weight
+  file goes missing. It works — the way a workshop works. The goal with Sovereign was the same
+  stack behaving like an <strong>appliance</strong>: one endpoint, one service, models that
+  swap while everything keeps running.</p>
+
+  <h2><span class="no">02</span>The approach</h2>
+  <p>Three layers with a strict division of labor. A custom <strong>llama.cpp</strong> build
+  does the inference. <strong>llama-swap</strong> owns the public API and the engine
+  lifecycle. A Python launcher resolves configuration and weights, then executes the
+  selected native engine. Everything downstream — GUIs, agents, editor plugins — talks to
+  one OpenAI-compatible endpoint at <code>127.0.0.1:1234/v1</code> and never learns what
+  sits behind it.</p>
+  <p>Profiles are the unit of configuration: a balanced 27B Qwen profile with thinking on, a
+  fast variant with thinking off, a 12B Gemma for lighter work, an experimental long-context
+  flash profile. The <code>model</code> field in the API request selects the profile;
+  llama-swap's exclusive groups handle the swap. One profile is resident at a time — the four
+  Qwen "slots" mean four concurrent requests to one model, not four loaded models. The CLI
+  refuses a conflicting load without <code>--replace</code>; the GUI and API can trigger
+  automatic swapping on demand.</p>
+  <p>Config is layered TOML: common defaults, then an inherited profile, then a per-platform
+  mapping, merged in a fixed order. The install script verifies published archive SHA-256s
+  for llama-swap and the stock runtime, and records the custom engine's hashes in a runtime
+  manifest. A systemd user service starts the manager at login with no model preloaded — RAM
+  is only spent when a model is actually asked for.</p>
+
+  <h2><span class="no">03</span>Trade-offs</h2>
+  <div class="trade"><b>GGUF quantization</b> — quality versus fit. The 27B profile runs in
+  ROCmFP4 with a draft model for speculative decoding: a 27B-class assistant that fits in
+  consumer memory. Quantization is a lossy choice made deliberately, per profile, and the
+  balanced/fast split exists because the same weights serve different quality-latency
+  postures with a single toggle.</div>
+  <div class="trade"><b>llama-swap</b> — freed idle RAM versus cold-start latency. One
+  resident model means a switch costs a reload. The mitigation is semantic: unload waits for
+  busy slots to go idle before releasing (with <code>--force</code> to skip), and on-demand
+  requests transparently reload an unloaded model rather than failing.</div>
+  <div class="trade"><b>Consumer unified memory</b> — the Strix Halo's 128 GB makes
+  model configurations that would need a server rack possible at consumer prices. Prefill
+  measures around 1,200–1,400 tok/s on this hardware: not datacenter throughput, but enough
+  that a 27B model feels immediate for the agentic workloads that dominate daily use.</div>
+  <div class="trade"><b>Staying local</b> — no rate limits, no subscriptions, no third party
+  seeing the prompts. The cost is access: this stack will never be the frontier. It is tuned
+  to be good enough, always on, and yours.</div>
+
+  <h2><span class="no">04</span>Under the hood</h2>
+  <p>The paranoia is in the details. A <code>verify</code> command checks weights against
+  catalog hashes and records destination path, size, mtime, and hash in a verification file.
+  Storage roots carry volume markers — a sentinel file that catches the wrong drive mounted at
+  a reused path. Hot reload of config is <em>deliberately disabled</em>: engine startup
+  rejects drift rather than combining old manager settings with new flags, and
+  <code>show-config</code> prints resolved paths and a sample argv before you commit to a
+  change. Unloading is documented as not an atomic admission barrier — the README says so
+  out loud, because a system you trust has to tell you where its edges are. A unittest suite
+  and a smoke test against a loaded model gate every change.</p>
+
+  <div class="pager">
+    <a href="../index.html#work">← All work</a>
+    <a href="g-helper-linux.html">Next →</a>
+  </div>
+</div>
+
+</body>
+</html>

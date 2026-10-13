@@ -1,0 +1,256 @@
+/* achagani.com — editorial. Type is the design. */
+:root {
+  --paper: #FBFAF7;
+  --ink: #1B1917;
+  --ink-soft: #4A453D;
+  --ink-faint: #8B8478;
+  --accent: #9C5A2F;
+  --copper: #9C5A2F; /* legacy alias for deep-dive pages */
+  --rule: #E4DFD5;
+  --serif: 'Source Serif 4', 'Iowan Old Style', Georgia, serif;
+  --sans: 'Inter', -apple-system, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 19px;
+  line-height: 1.7;
+  font-feature-settings: "kern", "liga", "onum";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+.wrap { max-width: 680px; margin: 0 auto; padding: 0 24px; }
+p { hanging-punctuation: first; }
+a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--rule);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: text-decoration-color .15s, color .15s;
+}
+a:hover { color: var(--accent); text-decoration-color: var(--accent); }
+
+/* ── ambient background: barely-there warmth in motion ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(60vmax 60vmax at 15% 8%,  rgba(156, 90, 47, .055), transparent 62%),
+    radial-gradient(55vmax 55vmax at 88% 85%, rgba(112, 96, 66, .05),  transparent 62%);
+  animation: drift 52s ease-in-out infinite alternate;
+}
+@keyframes drift {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  50%  { transform: translate3d(2.5%, -2%, 0) scale(1.06); }
+  100% { transform: translate3d(-2%, 2.5%, 0) scale(1.03); }
+}
+@media (prefers-reduced-motion: reduce) {
+  body::before { animation: none; }
+}
+
+/* ── masthead ─────────────────────────────── */
+nav {
+  padding: 26px 0;
+  border-bottom: 1px solid var(--rule);
+}
+nav .wrap { display: flex; justify-content: space-between; align-items: baseline; }
+nav .mark { font-weight: 600; font-size: 17px; letter-spacing: .01em; }
+nav .mark a { text-decoration: none; }
+nav .links a {
+  color: var(--ink-faint); margin-left: 26px; text-decoration: none;
+  font-family: var(--sans); font-size: 12.5px; letter-spacing: .12em;
+  text-transform: uppercase;
+}
+nav .links a:hover { color: var(--accent); }
+
+/* ── opening ──────────────────────────────── */
+header.opening { padding: 96px 0 72px; }
+.opening .name {
+  font-size: clamp(44px, 7vw, 68px); font-weight: 600;
+  line-height: 1.05; letter-spacing: -.02em;
+}
+.opening .standfirst {
+  margin-top: 28px; font-size: 23px; line-height: 1.55;
+  color: var(--ink-soft); font-style: italic; max-width: 600px;
+}
+.opening .standfirst em { font-style: normal; color: var(--accent); }
+
+/* ── sections ─────────────────────────────── */
+section { padding: 64px 0; border-top: 1px solid var(--rule); }
+.sec-label {
+  font-family: var(--sans); font-size: 11.5px; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 26px;
+}
+h2.sec-title {
+  font-size: 32px; font-weight: 600; letter-spacing: -.01em;
+  margin-bottom: 28px; line-height: 1.2;
+}
+
+/* ── about prose ──────────────────────────── */
+.prose p { margin-bottom: 22px; color: var(--ink-soft); max-width: 62ch; }
+.prose p strong { color: var(--ink); font-weight: 600; }
+.prose.dropcap > p:first-of-type::first-letter {
+  float: left; font-size: 76px; line-height: .82; font-weight: 600;
+  padding: 8px 12px 0 0; color: var(--ink);
+}
+.prose blockquote {
+  margin: 28px 0; padding-left: 22px; border-left: 2px solid var(--accent);
+  font-style: italic; color: var(--ink-soft); font-size: 20px;
+}
+
+/* ── work index (editorial list, not cards) ── */
+.worklist { list-style: none; }
+.worklist li {
+  display: grid; grid-template-columns: 44px 320px 1fr; gap: 0 24px;
+  padding: 26px 0; border-bottom: 1px solid var(--rule);
+  align-items: start;
+}
+.worklist li:first-child { border-top: 1px solid var(--rule); }
+.worklist .n {
+  font-family: var(--sans); font-size: 12px; color: var(--ink-faint);
+  letter-spacing: .08em; padding-top: 6px;
+}
+.worklist .w-thumb { display: block; text-decoration: none; }
+.worklist .w-thumb img {
+  width: 100%; aspect-ratio: 16 / 10; object-fit: cover; object-position: top center;
+  display: block; border: 1px solid var(--rule); border-radius: 6px;
+  filter: saturate(.92);
+  transition: transform .25s ease, box-shadow .25s ease, filter .25s ease;
+}
+.worklist li:hover .w-thumb img {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(20, 14, 8, .20);
+  filter: saturate(1);
+}
+.worklist .w-title { font-size: 21px; font-weight: 600; }
+.worklist .w-title a { text-decoration: none; }
+.worklist .w-title a:hover { color: var(--accent); }
+.worklist .w-year {
+  font-family: var(--sans); font-size: 12px; color: var(--ink-faint);
+  letter-spacing: .06em; margin-left: 12px; white-space: nowrap;
+}
+.worklist .w-desc { color: var(--ink-soft); font-size: 16.5px; margin-top: 8px; max-width: 62ch; }
+.worklist .w-links {
+  display: flex; flex-wrap: wrap; gap: 6px 20px; margin-top: 12px;
+  font-family: var(--sans); font-size: 12.5px;
+}
+.worklist .w-links a {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: var(--ink-faint); text-decoration: none; letter-spacing: .02em;
+}
+.worklist .w-links a:hover { color: var(--accent); }
+.worklist .w-links svg { opacity: .75; flex: none; }
+.worklist .w-links a.w-case { color: var(--accent); }
+.worklist .w-kind {
+  font-family: var(--sans); font-size: 10.5px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--accent);
+}
+
+/* ── career ledger ────────────────────────── */
+.ledger { border-top: 1px solid var(--rule); }
+.ledger .row {
+  display: grid; grid-template-columns: 130px 1fr; gap: 0 24px;
+  padding: 18px 0; border-bottom: 1px solid var(--rule);
+}
+.ledger .when {
+  font-family: var(--sans); font-size: 12.5px; color: var(--ink-faint);
+  letter-spacing: .05em; padding-top: 5px;
+}
+.ledger .what { font-size: 18px; font-weight: 600; }
+.ledger .what .org { color: var(--accent); font-weight: 600; }
+.ledger .note { grid-column: 2; font-size: 15.5px; color: var(--ink-soft); margin-top: 2px; max-width: 56ch; }
+
+/* ── notes / placeholder ─────────────────── */
+.soon { color: var(--ink-faint); font-style: italic; max-width: 56ch; }
+
+/* ── colophon ────────────────────────────── */
+.colophon {
+  font-family: var(--sans); font-size: 13px; line-height: 1.8;
+  color: var(--ink-faint); max-width: 58ch;
+}
+.colophon b { color: var(--ink-soft); font-weight: 500; }
+
+
+/* ── project screenshots ─────────────────── */
+figure.shot { margin: 34px 0 40px; }
+figure.shot img {
+  width: 100%; display: block;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  box-shadow: 0 12px 40px rgba(20, 14, 8, .18);
+}
+figure.shot figcaption {
+  font-family: var(--sans);
+  font-size: 12.5px;
+  color: var(--ink-faint);
+  margin-top: 10px;
+  padding-left: 2px;
+  line-height: 1.5;
+}
+
+/* ── footer ──────────────────────────────── */
+footer { border-top: 1px solid var(--rule); padding: 44px 0 72px; }
+footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 14px; }
+footer .fine { font-family: var(--sans); font-size: 13px; color: var(--ink-faint); }
+footer .links a {
+  margin-left: 22px; font-family: var(--sans); font-size: 12.5px;
+  letter-spacing: .1em; text-transform: uppercase; text-decoration: none;
+  color: var(--ink-faint);
+}
+footer .links a:hover { color: var(--accent); }
+
+/* ══ deep-dive pages (class contract kept) ══ */
+.dive { padding: 72px 0 40px; }
+.dive .back {
+  font-family: var(--sans); font-size: 12.5px; letter-spacing: .1em;
+  text-transform: uppercase; text-decoration: none; color: var(--ink-faint);
+}
+.dive .back:hover { color: var(--accent); }
+.dive h1 { font-size: clamp(36px, 5.5vw, 52px); font-weight: 600; letter-spacing: -.015em; margin: 16px 0 8px; }
+.dive .tagline { font-size: 21px; color: var(--ink-soft); font-style: italic; margin-bottom: 26px; max-width: 58ch; }
+.dive .meta {
+  display: flex; flex-wrap: wrap; gap: 6px 28px; padding: 14px 0;
+  border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+  font-family: var(--sans); font-size: 12.5px; color: var(--ink-faint);
+  letter-spacing: .03em; margin-bottom: 40px;
+}
+.dive .meta b { color: var(--ink-soft); font-weight: 500; }
+.dive h2 { font-size: 25px; font-weight: 600; margin: 44px 0 16px; letter-spacing: -.005em; }
+.dive h2 .no { color: var(--accent); font-weight: 400; margin-right: 12px; font-size: 16px; font-family: var(--sans); letter-spacing: .05em; }
+.dive p { margin-bottom: 18px; color: var(--ink-soft); max-width: 62ch; }
+.dive p strong { color: var(--ink); }
+.dive ul { margin: 0 0 20px 22px; color: var(--ink-soft); }
+.dive li { margin-bottom: 8px; max-width: 60ch; }
+.dive .trade {
+  border-left: 2px solid var(--accent); padding: 2px 0 2px 18px;
+  margin-bottom: 18px; color: var(--ink-soft); max-width: 60ch;
+}
+.dive .trade b { color: var(--ink); }
+.dive .pager {
+  display: flex; justify-content: space-between; padding: 32px 0 10px;
+  border-top: 1px solid var(--rule); margin-top: 52px;
+  font-family: var(--sans); font-size: 13px; letter-spacing: .06em;
+}
+.dive .pager a { text-decoration: none; color: var(--ink-faint); }
+.dive .pager a:hover { color: var(--accent); }
+
+/* legacy classes kept alive for deep dives written against the first pass */
+.timeline { position: relative; padding-left: 28px; }
+.timeline::before { content: ''; position: absolute; left: 4px; top: 6px; bottom: 6px; width: 1px; background: var(--rule); }
+.t-item { position: relative; padding-bottom: 30px; }
+.t-item::before { content: ''; position: absolute; left: -28px; top: 9px; width: 8px; height: 8px; border-radius: 50%; background: var(--paper); border: 2px solid var(--accent); }
+.t-when { font-family: var(--sans); font-size: 12px; letter-spacing: .08em; color: var(--ink-faint); text-transform: uppercase; }
+.t-role { font-size: 19px; font-weight: 600; margin: 2px 0 4px; }
+.t-role .org { color: var(--accent); }
+.t-note { color: var(--ink-soft); font-size: 16px; max-width: 60ch; }
+
+@media (max-width: 640px) {
+  .worklist li { grid-template-columns: 32px 1fr; }
+  .worklist .w-thumb { grid-column: 2; margin: 12px 0 2px; max-width: 420px; }
+  .worklist .w-body { grid-column: 2; }
+  .ledger .row { grid-template-columns: 1fr; gap: 2px; }
+}

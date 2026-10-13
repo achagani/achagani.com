@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Datumara — a local analytics language model · Aslam Chagani</title>
+<meta name="description" content="An open-source analytics language model that turns business questions into schema-aware SQL and decision-ready answers — trained on Spider with LoRA, shipped as a local Ollama model.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<nav><div class="wrap">
+  <span class="mark">Aslam Chagani</span>
+  <span class="links">
+    <a href="../index.html#story">About</a>
+    <a href="../index.html#work">Work</a>
+    <a href="../index.html#career">Career</a>
+    <a href="../index.html#contact">Contact</a>
+  </span>
+</div></nav>
+
+<div class="wrap dive">
+  <a class="back" href="../index.html#work">← Selected work</a>
+  <h1>Datumara</h1>
+  <p class="tagline">An open-source analytics language model: business questions in, schema-aware SQL and decision-ready answers out — running where the data actually lives.</p>
+  <div class="meta">
+    <span><b>Stack:</b> Python · Qwen2.5 fine-tuning (LoRA) · Spider dataset · Ollama</span>
+    <span><b>Status:</b> v0.1-alpha proof of concept, public</span>
+    <span><b>Links:</b> <a href="https://github.com/achagani/datumara">github.com/achagani/datumara</a> · <a href="https://achagani.github.io/datumara/">achagani.github.io/datumara</a></span>
+  </div>
+
+  <figure class="shot"><img src="../assets/shots/datumara.png" alt="Brand image from the project's landing page — achagani.github.io/datumara." loading="lazy"><figcaption>Brand image from the project's landing page — achagani.github.io/datumara.</figcaption></figure>
+
+  <h2><span class="no">01</span>The problem</h2>
+  <p>Every company has the same bottleneck: the distance between a business question and its answer
+  is an analyst's backlog. Generic text-to-SQL tools don't fix it — they guess at schemas they don't
+  know and produce queries that look right and are subtly wrong. And frontier cloud models can't help
+  where it matters most, because the schema and the data can't leave the building. What's missing is a
+  <strong>small model, trained on the pairing that actually matters</strong> — question ↔ schema ↔
+  query — that runs locally, next to the warehouse.</p>
+
+  <h2><span class="no">02</span>The approach</h2>
+  <p>Datumara fine-tunes a 3.5B-parameter base model (Qwen2.5) on the Spider text-to-SQL corpus,
+  augmented to roughly 7,000 examples, with a split of 60/20/20 for train/validation/test. A
+  complexity classifier routes queries by difficulty so training focuses capacity where errors
+  cluster, and a hard-example mining loop feeds the model's own failures back into the next round.
+  LoRA adapters keep training cheap enough to iterate on a single GPU. The finished model exports
+  straight to Ollama: <code>ollama pull datumara-local</code> and one command gets you from install
+  to answering questions against your own schema.</p>
+
+  <h2><span class="no">03</span>Trade-offs</h2>
+  <div class="trade"><b>Small on purpose</b> — a 3.5B model that knows your schema beats a
+  frontier model guessing at it, and it fits on hardware where the data is allowed to be processed.
+  The bet is that training data quality, not parameter count, is the lever.</div>
+  <div class="trade"><b>Honest alpha</b> — v0.1 is labeled proof-of-concept everywhere it appears:
+  the README states the model may produce incomplete SQL, and VERSIONING.md defines the quality
+  targets for the v1.0 roadmap. A demo that oversells would poison the very trust the product is
+  about.</div>
+  <div class="trade"><b>Answer, not just query</b> — generating SQL is half the job. The other half
+  is executing it and citing the tables, joins, and date windows used, so a human can verify the
+  answer instead of re-deriving it. Plausible SQL that nobody checks is how bad decisions get made
+  with a dashboard's blessing.</div>
+
+  <h2><span class="no">04</span>Under the hood</h2>
+  <p>The training pipeline is a set of composable scripts: <code>train.py</code> with YAML config
+  presets for model sizes (3.5B/7B/13B), hyperparameters, and LoRA settings;
+  <code>evaluate.py</code> and <code>benchmark_baseline.py</code> for measuring against the
+  un-fine-tuned baseline; <code>compare_models.py</code> for side-by-side runs; and
+  <code>poc_verification.py</code> as the end-to-end gate. Docker images with GPU support make the
+  whole thing reproducible on a fresh machine. It's early — but the skeleton of a serious analytics
+  model product is there, and it runs entirely on your side of the firewall.</p>
+
+  <div class="pager"><a href="taskcards.html">&larr; TaskCards</a><a href="rtide.html">RTIDE →</a></div>
+</div>
+
+<footer><div class="wrap">
+  <span class="fine">© 2026 Aslam Chagani</span>
+</div></footer>
+
+</body>
+</html>

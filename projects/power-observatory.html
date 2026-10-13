@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Power Observatory — live power telemetry for KDE Plasma 6</title>
+<meta name="description" content="A live CPU/GPU/NPU power, battery, and thermal dashboard for KDE Plasma 6, with power-profile and display-refresh controls built into the widget.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<nav><div class="wrap">
+  <span class="mark">Aslam Chagani</span>
+  <span class="links">
+    <a href="../index.html#story">About</a>
+    <a href="../index.html#work">Work</a>
+    <a href="../index.html#career">Career</a>
+    <a href="../index.html#contact">Contact</a>
+  </span>
+</div></nav>
+
+<div class="wrap dive">
+  <a class="back" href="../index.html#work">&larr; Selected work</a>
+  <h1>Power Observatory</h1>
+  <p class="tagline">A live power and compute dashboard for KDE Plasma 6 — with the profile and refresh-rate controls sitting right next to the readouts.</p>
+  <div class="meta">
+    <span><b>Stack:</b> QML, Python, JavaScript</span>
+    <span><b>Status:</b> Public (MIT)</span>
+    <span><b>Links:</b> <a href="https://github.com/achagani/power-observatory">github.com/achagani/power-observatory</a></span>
+  </div>
+  <figure class="shot"><img src="../assets/shots/powerobs.png" alt="Screenshot from the project's GitHub repo — live telemetry with discovered refresh-rate controls." loading="lazy"><figcaption>Screenshot from the project's GitHub repo — live telemetry with discovered refresh-rate controls.</figcaption></figure>
+
+
+  <h2><span class="no">01</span>The problem</h2>
+  <p>KDE Plasma 6 gives you a battery percentage and a power-profile menu. That is the entire story it tells. On most laptops that is tolerable; on an AMD Strix Halo machine it is close to useless. A Ryzen AI MAX+ 395 with a Radeon 8060S puts a CPU, a serious integrated GPU, and an NPU on one chip, sharing one power budget and one pool of memory. When the fan spins up, <em>which of the three caused it?</em> When the battery drains in two hours, where did the watts go? And is the panel still idling at 60&nbsp;Hz when it can run at 180? Plasma has no first-class answer for any of this — especially for the NPU, which Linux had barely heard of when Plasma 6 shipped.</p>
+
+  <h2><span class="no">02</span>The approach</h2>
+  <p>A native Plasma widget, not an external dashboard. QML draws a dark panel on the desktop; a Python collector reads hardware sensors every two seconds, with capability discovery on a slower ten-second cycle so the polling cost stays low enough to leave running indefinitely. No telemetry upload, no resident daemon — the widget is the whole system.</p>
+  <p>The readouts go deep: per-thread CPU utilization with frequency, core power, temperature, EPP and governor; GPU utilization with compute- and media-engine activity, power, clocks, and reserved UMA/GTT memory; and NPU activity decoded from AMD firmware by IPU column, with its own power, frequency, and memory traffic. Alongside the gauges, the widget carries <strong>controls</strong>: Saver / Balanced / Performance buttons wired to power-profiles-daemon, and per-display refresh-rate buttons through <code>kscreen-doctor</code> — each output gets its own buttons at its current resolution, with the applied mode verified before the check mark appears.</p>
+
+  <h2><span class="no">03</span>Trade-offs</h2>
+  <div class="trade"><b>Widget-in-panel vs. external dashboard.</b> A web dashboard could show more; a widget shows up where your eyes already are, with zero extra windows. The price is real estate — solved with four scrollable detail views and a stated intent of one instance per session.</div>
+  <div class="trade"><b>Freshness vs. polling cost.</b> Two-second sensor samples and ten-second discovery is a deliberate middle: live enough to correlate a fan ramp with a workload, cheap enough to ignore. Discovery revalidates immediately after any control change or hotplug event.</div>
+  <div class="trade"><b>Honesty vs. pretty gauges.</b> This is where the project is most opinionated. Color thresholds are labeled as display conventions, not safety limits, and are user-configurable. Thermal bars use the kernel's own <code>temp*_max</code> / <code>temp*_crit</code>; with no driver-reported limit the widget says <em>&ldquo;Limit unavailable&rdquo;</em> rather than inventing a safe range. Battery time is a smoothed estimate that refuses to guess at zero flow. Total AC wall draw is declared unavailable instead of being approximated from parts that don't sum.</div>
+  <div class="trade"><b>ABI coupling.</b> The AMD firmware decoder targets the <code>gpu_metrics</code> v3.0 ABI; other revisions fall back to generic readable sensors, and Intel/NVIDIA GPU backends are simply not implemented. Narrow and correct beats broad and wrong.</div>
+
+  <h2><span class="no">04</span>Under the hood</h2>
+  <p>The collector reads Linux hwmon/sysfs for temperatures, power, and battery; <code>powerprofilesctl</code> for profile state; and <code>kscreen-doctor</code> JSON for display discovery. The interesting piece is the AMD <code>gpu_metrics</code> decoder, which unpacks the firmware blob into per-engine activity, NPU state, and memory traffic — the only practical window into what the NPU is doing. Charger nameplate wattage usually can't be detected, so the widget lets owners supply their own ratings in a small JSON config instead of assuming. The engineering discipline shows in CI: Python tests across 3.10&ndash;3.14, offscreen QML interaction checks, and package builds — all driven by synthetic fixtures so no contributor needs a Strix Halo to verify a change. An <code>AGENTS.md</code> contract puts AI-assisted contributions through the same gates as human ones.</p>
+
+  <div class="pager">
+    <a href="g-helper-linux.html">&larr; g-helper-linux</a>
+    <a href="taskcards.html">TaskCards &rarr;</a>
+  </div>
+</div>
+
+<footer><div class="wrap">
+  <span class="fine">&copy; 2026 Aslam Chagani &middot; Columbia College, BSc Computer Science</span>
+  <span class="links">
+    <a href="mailto:chagani.aslam@gmail.com">Email</a>
+    <a href="https://github.com/achagani">GitHub</a>
+    <a href="https://linkedin.com/in/achagani">LinkedIn</a>
+  </span>
+</div></footer>
+
+</body>
+</html>

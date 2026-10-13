@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgentOS — a declarative operating model for AI agents · Aslam Chagani</title>
+<meta name="description" content="Versioned ontology, policy tiers, and reconciliation for personal AI agents — so drift surfaces as a diff, not an incident.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<nav><div class="wrap">
+  <span class="mark">Aslam Chagani</span>
+  <span class="links">
+    <a href="../index.html#story">About</a>
+    <a href="../index.html#work">Work</a>
+    <a href="../index.html#career">Career</a>
+    <a href="../index.html#contact">Contact</a>
+  </span>
+</div></nav>
+
+<div class="wrap dive">
+  <a class="back" href="../index.html#work">← Selected work</a>
+  <h1>AgentOS</h1>
+  <p class="tagline">An operating model for personal AI agents: say what the system is in data, and let drift surface as a diff.</p>
+  <div class="meta">
+    <span><b>Stack:</b> YAML + JSON Schema · Python validator · git · Hermes cron fleet</span>
+    <span><b>Status:</b> Canonical, running daily (private)</span>
+    <span><b>Links:</b> <a href="https://github.com/achagani">github.com/achagani</a></span>
+  </div>
+  <figure class="shot"><img src="../assets/shots/agentos.png" alt="Product shot — the ontology, the validator, and a drift diff caught by the daily reconcile pass (recreated from the running system)." loading="lazy"><figcaption>Product shot — the ontology, the validator, and a drift diff caught by the daily reconcile pass (recreated from the running system).</figcaption></figure>
+
+
+  <h2><span class="no">01</span>The problem</h2>
+  <p>Personal AI agents fail by accretion. A mail pipeline here, a morning digest there, a browser
+  automation wired to one shell script and a prompt that says <strong>"never send money
+  actions"</strong> somewhere in the system prompt. Six months in, nobody — including the agent —
+  can answer basic questions: what is this agent allowed to do? Which job writes which file? Which
+  policy is enforced, and which is a hope expressed in prose? Policies drift from behavior, context
+  bleeds across unrelated work, and the failure mode is quiet until it isn't.</p>
+
+  <h2><span class="no">02</span>The approach</h2>
+  <p>AgentOS treats the agent fleet as a specification problem. The core is a
+  <strong>versioned ontology</strong> — v1.4.0 on schema version 3 — written in YAML and validated
+  against a JSON Schema before anything runs. It defines closed vocabularies (domains:
+  <em>local / external / comm</em>; target classes: <em>normal / secret / financial / physical /
+  identity</em>; verdicts: <em>deny / confirm</em>) and a typed graph of services, tools, jobs,
+  channels, threads, and policies. Twelve machine-checkable invariants hold it together; my favorite:
+  <strong>a rule with no gate is a wish</strong>.</p>
+  <p>A separate <strong>binding file</strong> maps every ontology ID to a live harness address: cron
+  job refs, CDP ports, mount points, credential handles. Switching agent harnesses means rewriting
+  only the binding; the ontology rides along untouched. Reconciliation passes diff spec against
+  reality: a cron job that exists but isn't declared, a declared job with no scheduler ref, a policy
+  naming an enforcement mechanism that doesn't exist in the binding. Each is a validator error, so
+  drift shows up as a failing check — a diff, not an incident.</p>
+
+  <h2><span class="no">03</span>Trade-offs</h2>
+  <div class="trade"><b>Declarative YAML over code</b> — YAML is less expressive, and I've felt that
+  cost. In exchange: every rule is human-readable, git-diffable, and mechanically checkable. An
+  unreadable policy is an unenforceable one.</div>
+  <div class="trade"><b>Policy tiers, and an honest gap</b> — enforcement is graded: T1 is prompt-tier
+  (instructions in the agent's "soul"), T2 is mechanism-tier (allowlists in a bridge config, vault
+  tools), T3 is capability-absence (the script literally has no shred code path). Invariant 9 says no
+  policy may rest solely on T1 — it must name a T2/T3 mechanism or carry an explicit
+  <code>upgrade_path</code>. Several policies are still prompt-tier with a declared upgrade to scope
+  isolation. The ontology doesn't hide that; it tracks it as debt.</div>
+  <div class="trade"><b>The hallucination lesson</b> — the agent once announced a version release that
+  never happened, citing a commit that didn't exist. That produced the load-verification ritual: a
+  post-commit hook regenerates a literal load line — version, schema, commit hash — and every session
+  must open by quoting the freshly-read file verbatim. Composing the line from memory is forbidden; a
+  missing or unparseable load line must be announced as a failure to load. Trust, but read the file.</div>
+  <div class="trade"><b>The ownership firewall</b> — Tasks are human-owned; AgentJobs are
+  agent-owned. An agent may append to a task's log but never mark a task done without explicit human
+  confirmation, and the log is append-only: corrections get a new line, never a rewrite.</div>
+
+  <h2><span class="no">04</span>Under the hood</h2>
+  <p>A pre-commit hook blocks any commit that fails schema validation. The cron fleet — mail pipeline,
+  morning digest, news digest, inference watchdog, job-search sweep — each carries its scheduler ref
+  in the binding, and every job's success or failure is routed by explicit route rules or declared
+  silent. Memory is typed the same way: every retain call carries tags like
+  <code>thread:job-search</code>, <code>entity:job-mail-pipeline</code>,
+  <code>rel:serves</code>, so threads are first-class graph nodes and cross-thread links
+  (job-search ⟷ apartment-search) are declared edges, not implied vibes. Personas are enforcement
+  envelopes — each agent declares which stores it can touch, which models it may use, and which
+  channels it may speak on. It's the same discipline I ran at platform scale, pointed inward at one
+  person's life.</p>
+
+  <div class="pager"><a href="../index.html#work">← All work</a><a href="folio.html">Next →</a></div>
+</div>
+
+</body>
+</html>

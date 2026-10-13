@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nestfinder — achagani</title>
+<meta name="description" content="A criteria-driven rental scanner: declare what you need in YAML, diff the live market, see only the delta.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<nav><div class="wrap">
+  <span class="mark">Aslam Chagani</span>
+  <span class="links">
+    <a href="../index.html#story">About</a>
+    <a href="../index.html#work">Work</a>
+    <a href="../index.html#career">Career</a>
+    <a href="../index.html#contact">Contact</a>
+  </span>
+</div></nav>
+
+<div class="wrap dive">
+  <a class="back" href="../index.html#work">← Selected work</a>
+  <h1>Nestfinder</h1>
+  <p class="tagline">Declare what you need in YAML. Watch the live market. See only the delta.</p>
+
+  <div class="meta">
+    <span><b>Stack:</b> Python · YAML · browser automation</span>
+    <span><b>Status:</b> Private — proven live</span>
+    <span><b>Links:</b> Private project</span>
+  </div>
+  <figure class="shot"><img src="../assets/shots/nestfinder.png" alt="Product shot — criteria as code, live scan with honest unconfirmed markers (recreated from the running engine)." loading="lazy"><figcaption>Product shot — criteria as code, live scan with honest unconfirmed markers (recreated from the running engine).</figcaption></figure>
+
+
+  <h2><span class="no">01</span>The problem</h2>
+  <p>Apartment hunting is a noise problem wearing a data problem's clothes. The criteria are
+  clear — budget, bedrooms, in-unit laundry, square footage, neighborhood — but they live in
+  your head while you re-run the same search across three listing sites, scroll the same
+  inventory, and wonder whether anything changed since Tuesday. Worse, the inventory moves
+  hourly: a unit that fit yesterday is leased, a new one posts at 11 pm, prices drift without
+  notice. The browser-tab treadmill doesn't scale, and the one interesting signal —
+  <strong>what just appeared that I haven't seen and actually fits</strong> — is exactly what
+  no listing site surfaces well.</p>
+
+  <h2><span class="no">02</span>The approach</h2>
+  <p>Nestfinder inverts the workflow. Instead of searching, you declare. A single
+  <strong>criteria.yaml</strong> holds the whole brief: hard constraints (a monthly cap that
+  includes parking, one bedroom only, in-unit washer and dryer as a must-have, a 600 sq ft
+  target with a 500 floor), soft scoring (neighborhood tiers, walk-score thresholds, grocery
+  and pharmacy walk-minutes), explicit dealbreakers, and a rolling move-in window — available
+  within today plus three weeks, re-evaluated each sweep rather than hard-coded.</p>
+  <p>A daily cron sweep runs the declared search against apartments.com through a real
+  browser session — probed first, because the results and detail pages carry no bot wall —
+  and pipes the resulting property URLs into a small diff engine.
+  <strong>diff_state.py</strong> compares the fresh URL set against
+  <code>state/seen.json</code>, returns only the unseen ones with a first-seen timestamp, and
+  writes state atomically (temp file plus <code>os.replace</code>) so a crash mid-write can't
+  corrupt the ledger. Alerts fire only on new listings. Each new listing gets a research pass
+  — price, lease terms, amenities, walk score; shortlisted ones get the deeper pass over fee
+  schedules, reviews, and market-median comparison.</p>
+  <p>What you review lives on a local board: a 127.0.0.1 server with a Leaflet map and four
+  statuses per listing — keep, discard, research, contacted. The sweep finds, the human
+  decides, and the state file remembers both.</p>
+
+  <h2><span class="no">03</span>Trade-offs</h2>
+  <div class="trade"><b>Browser automation vs. paid APIs</b> — paid aggregator APIs offer
+  stability and structured fields for a monthly fee, and still rate-limit you. Browser
+  automation against a probed source costs nothing and sees exactly what a human sees,
+  including the misleading price cards. The fragility is real, so the source list is explicit
+  in the YAML with a probed/unprobed status per site, and audit scripts exist to catch drift.</div>
+  <div class="trade"><b>YAML as the criteria language</b> — the brief becomes auditable and
+  versionable. Changing the budget cap is a diff. The agent running the sweep and the human
+  reviewing the output read the same file, so "what are we looking for" never drifts between
+  them.</div>
+  <div class="trade"><b>State-diff vs. full re-ranking</b> — diffing is idempotent and
+  re-runnable: rerun the sweep and you get the same "new" set, no double alerts, no
+  rewritten history. The cost is that the system only knows what it has seen; it doesn't
+  re-judge old listings when criteria change. That's acceptable — criteria changes are rare
+  and deliberate, and the seen-file doubles as a record of the market as it was.</div>
+
+  <h2><span class="no">04</span>Under the hood</h2>
+  <p>The ledger is deliberately boring: property URL to <code>{first_seen, status}</code>,
+  with a single-writer rule — only the finder job may write it. Around the core, helper
+  scripts build context: listings geocoded against OpenStreetMap data, neighborhood metrics
+  collected and tiered by density × price × centrality, deals imported with a source audit.
+  Tests cover the board app, the audit, the deals, and the neighborhood logic — a tool you
+  trust with a housing search should be tested like one. The whole thing runs unattended on
+  cron and pings a self-chat when something new actually fits the brief.</p>
+
+  <div class="pager">
+    <a href="../index.html#work">← All work</a>
+    <a href="../index.html#work">↑ Top</a>
+  </div>
+</div>
+
+</body>
+</html>

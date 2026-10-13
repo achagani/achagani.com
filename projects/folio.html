@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Folio — a quiet native PDF reader in Rust · Aslam Chagani</title>
+<meta name="description" content="Offline-first PDF reading for Linux: Markdown-native notes, content-addressed highlights, and a reading coach that never leaves localhost.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<nav><div class="wrap">
+  <span class="mark">Aslam Chagani</span>
+  <span class="links">
+    <a href="../index.html#story">About</a>
+    <a href="../index.html#work">Work</a>
+    <a href="../index.html#career">Career</a>
+    <a href="../index.html#contact">Contact</a>
+  </span>
+</div></nav>
+
+<div class="wrap dive">
+  <a class="back" href="../index.html#work">← Selected work</a>
+  <h1>Folio</h1>
+  <p class="tagline">A quiet, native PDF reader for Linux — your library stays on disk, your notes stay Markdown, and the AI never leaves the machine.</p>
+  <div class="meta">
+    <span><b>Stack:</b> Rust · eframe/egui · pdfium-render · rusqlite</span>
+    <span><b>Status:</b> Actively developed; public release coming soon</span>
+    <span><b>Links:</b> <a href="https://github.com/achagani">github.com/achagani</a></span>
+  </div>
+  <figure class="shot"><img src="../assets/shots/folio.png" alt="Screenshot from the project — the reader with linked highlights and Markdown-native notes." loading="lazy"><figcaption>Screenshot from the project — the reader with linked highlights and Markdown-native notes.</figcaption></figure>
+
+  <figure class="shot"><img src="../assets/shots/folio-focus.png" alt="Focus mode — the reading surface takes the whole window; controls stay one keystroke away." loading="lazy"><figcaption>Focus mode — the reading surface takes the whole window; controls stay one keystroke away.</figcaption></figure>
+
+
+  <h2><span class="no">01</span>The problem</h2>
+  <p>Reading PDFs on Linux means choosing between two bad options: a bloated suite you didn't ask for,
+  or a cloud app that wants an account before you've opened a file. Worse is where the thinking goes.
+  Highlights and margin notes — the actual output of reading a hard book — get trapped in a vendor's
+  database, exportable at best as a CSV that loses all context. After a decade of building systems I
+  wanted the opposite: a reader where the valuable artifacts are plain files I own, and the software
+  on top of them is replaceable.</p>
+
+  <h2><span class="no">02</span>The approach</h2>
+  <p>Folio is a native Rust app — eframe/egui for the interface, PDFium for rendering, SQLite for
+  the index — with one structural commitment: <strong>Markdown is the truth, the database is a
+  cache</strong>. Every book gets a note record in a folder you choose; metadata, highlights, and
+  bookmarks live there as human-readable Markdown. The SQLite index is disposable —
+  <code>folio resync</code> rebuilds it from the notes in seconds. Put the notes folder inside an
+  Obsidian vault and your reading history becomes part of your notes, not a hostage situation.
+  Lookups work offline too: Open English WordNet ships with the app, so a click on a word gets a
+  definition with no network round-trip.</p>
+
+  <h2><span class="no">03</span>Trade-offs</h2>
+  <div class="trade"><b>Native Rust over Electron</b> — instant startup and a few hundred MB less RAM,
+  paid for in packaging pain. The prebuilt archive targets x86-64 Linux with glibc and nothing else;
+  everyone else builds from source. I decided a reader that opens like a book beats a reader that opens
+  like a browser.</div>
+  <div class="trade"><b>Markdown-as-truth</b> — the index can be thrown away and rebuilt, notes are
+  git-diffable, and any future tool can read them without Folio's permission. The cost is that write
+  paths must treat the Markdown file as authoritative and the cache as derived — a discipline that
+  shapes every command in the CLI.</div>
+  <div class="trade"><b>Content-addressed highlights</b> — a highlight's ID is the first 12 hex
+  characters of a SHA-256 over <code>book:page:rect</code>, with rectangle coordinates formatted to
+  four decimals. Same selection, same ID, forever — no auto-increment counters to collide when notes
+  merge. The format isn't Folio's invention alone: a Python reference implementation generates
+  conformance fixtures, and the Rust code must reproduce them byte-identically in a test. Two
+  implementations, one contract.</div>
+  <div class="trade"><b>Local-only coach</b> — the reading coach discusses a page, quizzes you, or
+  argues against your claim, but the client rejects any endpoint that isn't
+  <code>http://127.0.0.1:&lt;port&gt;</code>. Remote addresses, proxies, redirects: refused at the
+  URL check. Each opt-in request sends a bounded excerpt — the active page, the selected passage,
+  saved highlights — never the whole book. That's less capable than a cloud assistant with your full
+  library; it's the point. Privacy here is a hard boundary, not a settings toggle.</div>
+
+  <h2><span class="no">04</span>Under the hood</h2>
+  <p>The crate splits into a CLI core and an optional <code>gui</code> feature:
+  <code>contracts.rs</code> pins the shared data shapes and the highlight-ID function,
+  <code>vault.rs</code> owns the Markdown round-trip, <code>store.rs</code> and
+  <code>sync.rs</code> keep the SQLite cache honest, <code>coach.rs</code> enforces the localhost
+  rule, and <code>ui_scale.rs</code> handles HiDPI so a 160% display stays sane. The CLI does
+  everything the GUI does — <code>folio search</code>, <code>folio define</code>,
+  <code>folio resync</code> — which keeps the GUI a thin skin. Focus mode strips every panel for
+  fullscreen reading; copper ribbons mark bookmarked pages. Bundled assets carry their provenance:
+  PDFium, WordNet, and Noto fonts all ship with license notices. Linux x86_64 builds are packaged
+  locally today; the public GitHub release is going live soon.</p>
+
+  <div class="pager"><a href="../index.html#work">← All work</a><a href="sovereign.html">Next →</a></div>
+</div>
+
+</body>
+</html>

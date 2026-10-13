@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RTIDE — a rich terminal IDE for agentic work · Aslam Chagani</title>
+<meta name="description" content="A terminal-based agentic development workspace: the terminal stays the input surface, and substantive output renders as graphically rich HTML through tweb.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<nav><div class="wrap">
+  <span class="mark">Aslam Chagani</span>
+  <span class="links">
+    <a href="../index.html#story">About</a>
+    <a href="../index.html#work">Work</a>
+    <a href="../index.html#career">Career</a>
+    <a href="../index.html#contact">Contact</a>
+  </span>
+</div></nav>
+
+<div class="wrap dive">
+  <a class="back" href="../index.html#work">← Selected work</a>
+  <h1>RTIDE</h1>
+  <p class="tagline">Rich Terminal IDE — keep the speed of the terminal, get the expressive range of the web.</p>
+  <div class="meta">
+    <span><b>Stack:</b> Shell · Neovim · tweb (terminal web renderer) · agent harness</span>
+    <span><b>Status:</b> Public, in daily use</span>
+    <span><b>Links:</b> <a href="https://github.com/achagani/rtide">github.com/achagani/rtide</a> · <a href="https://achagani.github.io/rtide/">achagani.github.io/rtide</a></span>
+  </div>
+
+  <figure class="shot"><img src="../assets/shots/rtide-workspace.png" alt="RTIDE workspace with Neovim, rich tweb output, and the agent prompt — screenshot from the project's GitHub repo." loading="lazy"><figcaption>RTIDE workspace with Neovim, rich tweb output, and the agent prompt — screenshot from the project's GitHub repo.</figcaption></figure>
+
+  <h2><span class="no">01</span>The problem</h2>
+  <p>Agent-driven development lives in two unhappy worlds. In the terminal, everything — diffs,
+  charts, plans, tables — collapses into a wall of Markdown, and the interesting output gets skimmed
+  or lost. In the browser, output is beautiful but you've left the place where the work happens:
+  files, shells, git, editors. Every switch costs context. The terminal's speed and composability are
+  worth keeping; the web's expressiveness is worth having. Nobody had wired them together.</p>
+
+  <h2><span class="no">02</span>The approach</h2>
+  <p>RTIDE is a blended single-tool workspace. Neovim and a <strong>tweb</strong> renderer pane sit
+  side by side; a thin agent strip at the bottom is exactly as tall as its content — a one-line
+  status (<code>● idle</code>, <code>● working 12s · Edit src/app.py</code>, <code>● done</code>)
+  and a prompt. The terminal stays the <em>input</em> surface; every substantive output from the
+  agent is channeled through tweb and rendered as graphically rich HTML in its own pane. Type a
+  request, keep working in the editor, read the result like a web page without leaving the terminal.</p>
+
+  <h2><span class="no">03</span>Trade-offs</h2>
+  <div class="trade"><b>Keyboard-first, always</b> — zoom the agent strip with
+  <code>prefix+a</code>, steer a running turn with <code>/steer</code>, stop with
+  <code>/interrupt</code>, replay with <code>/resend</code>, inspect pending work with
+  <code>/queue</code>. Nothing requires reaching for the mouse; follow-ups queue while a turn runs
+  instead of clobbering it.</div>
+  <div class="trade"><b>Harness-agnostic by design</b> — the agent runs non-interactively behind the
+  strip. Swap the model or the harness; the workspace contract (input strip, status line, tweb
+  output) doesn't change. The IDE owns the interaction, not the vendor.</div>
+  <div class="trade"><b>One window, opinionated layout</b> — the split ratios (editor ~40%, tweb
+  ~60%, agent ~30% strip) are config, not debate. RTIDE is deliberately not a general window
+  manager; it's a fixed shape optimized for one workflow: edit, delegate, read.</div>
+
+  <h2><span class="no">04</span>Under the hood</h2>
+  <p>Workspaces are managed as terminal sessions with a layout contract; the agent harness is invoked
+  per turn with its transcript rendered into tweb, so rich output — tables, diffs, highlighted
+  code, links — arrives as HTML while the shell stays raw and fast. New workspaces start with focus
+  in the agent prompt, because the first thing you do is delegate. The whole stack is shell, config,
+  and a renderer — no Electron, no daemon zoo — which is why it stays out of the way.</p>
+
+  <div class="pager"><a href="datumara.html">&larr; Datumara</a><a href="steward.html">Steward →</a></div>
+</div>
+
+<footer><div class="wrap">
+  <span class="fine">© 2026 Aslam Chagani</span>
+</div></footer>
+
+</body>
+</html>
